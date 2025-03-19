@@ -20,7 +20,7 @@ class NeuralNetwork:
         self.A = A  # len(A) = 3
 
     def backpropagation(self, ac):
-        dLdA = 2 * (self.A[-1] - ac)
+        dLdA = 2 * (self.A[-1] - ac)  # MSE loss
         dLdW = []
         dLdW0 = []
         for i in range(self.n_layers-1, 0, -1):
@@ -39,7 +39,7 @@ class NeuralNetwork:
             self.W0[i] = self.W0[i] - nu / mini_batch_size * self.dLdW0[i]
 
     def _shuffle_dataset(self):
-        shuffle_indices = np.random.permutation(X.shape[1])
+        shuffle_indices = np.random.permutation(self.X.shape[1])
         X_shuffle = self.X[:, shuffle_indices]
         Y_shuffle = self.Y[:, shuffle_indices]
         self.X = X_shuffle
