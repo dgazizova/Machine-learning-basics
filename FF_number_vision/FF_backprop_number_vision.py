@@ -115,8 +115,8 @@ X_test = test_images.T
 Y_test = test_labels.T
 
 # FF use MSE as lost function
-# net = NeuralNetwork([Linear(784, 30), Sigmoid(), Linear(30, 10), Sigmoid()],"MSE")  # first layer is size of X second can be any size and third is size of Y
-# net.train(X, Y, nu=2.0, mini_batch_size=5, epochs=101, X_test=X_test, Y_test=Y_test)
+net = NeuralNetwork([Linear(784, 30), Sigmoid(), Linear(30, 10), Sigmoid()],"MSE")  # first layer is size of X second can be any size and third is size of Y
+net.train(X, Y, nu=2.0, mini_batch_size=5, epochs=101, X_test=X_test, Y_test=Y_test)
 
 # FF use NLL as lost function
 net = NeuralNetwork([Linear(784, 30), Sigmoid(), Linear(30, 10), Sigmoid()],"NLL")
