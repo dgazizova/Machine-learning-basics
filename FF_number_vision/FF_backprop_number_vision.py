@@ -41,11 +41,17 @@ class Sigmoid(Module):
         return dLdZ
 
 class NeuralNetwork:
-    def __init__(self, modules):
+    def __init__(self, modules, loss):
         self.modules = modules
+        self.loss = loss
 
     def MSE(self, Ypred, Y):
         dLdA = 2 * (Ypred - Y)
+        # print(dLdA.shape)
+        return dLdA
+
+    def NLL(self, Ypred, Y):  # negative log likelihood or cross entropy
+        dLdA = (Ypred - Y) / (Ypred - Ypred**2)
         return dLdA
 
     def _shuffle_dataset(self):
@@ -63,7 +69,12 @@ class NeuralNetwork:
             self._shuffle_dataset()
             for k in range(0, n, mini_batch_size):
                 Ypred = self.feedforward(self.X[:, k:k+mini_batch_size])
-                delta = self.MSE(Ypred, self.Y[:, k:k+mini_batch_size])
+                if self.loss == "MSE":
+                    delta = self.MSE(Ypred, self.Y[:, k:k+mini_batch_size])
+                elif self.loss == "NLL":
+                    delta = self.NLL(Ypred, self.Y[:, k:k+mini_batch_size])
+                else:
+                    raise ValueError("Loss is not MSE or NLL")
                 self.backward(delta)
                 self.sgd_step(nu, mini_batch_size)
             if i % 10 == 0:
@@ -103,8 +114,13 @@ Y = train_labels.T
 X_test = test_images.T
 Y_test = test_labels.T
 
-net = NeuralNetwork([Linear(784, 30), Sigmoid(), Linear(30, 10), Sigmoid()])  # first layer is size of X second can be any size and third is size of Y
-net.train(X, Y, nu=2.0, mini_batch_size=10, epochs=101, X_test=X_test, Y_test=Y_test)
+# FF use MSE as lost function
+# net = NeuralNetwork([Linear(784, 30), Sigmoid(), Linear(30, 10), Sigmoid()],"MSE")  # first layer is size of X second can be any size and third is size of Y
+# net.train(X, Y, nu=2.0, mini_batch_size=5, epochs=101, X_test=X_test, Y_test=Y_test)
+
+# FF use NLL as lost function
+net = NeuralNetwork([Linear(784, 30), Sigmoid(), Linear(30, 10), Sigmoid()],"NLL")
+net.train(X, Y, nu=0.1, mini_batch_size=10, epochs=101, X_test=X_test, Y_test=Y_test)
 
 
 

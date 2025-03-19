@@ -10,7 +10,7 @@ class NeuralNetwork:
         self.n_layers = len(layers)
         self.layers = layers
         self.W = [np.random.randn(layers[i], layers[i+1]) for i in range(self.n_layers - 1)]  # randn is Gaussian distribution
-        self.W0 = [np.random.randn(layer, 1) for layer in layers[1:]]
+        self.W0 = [np.zeros((layer, 1)) for layer in layers[1:]]
 
     def feedforward(self, X):
         A = [X]  # A0 = X
