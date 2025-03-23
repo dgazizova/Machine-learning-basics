@@ -1,5 +1,12 @@
+import enum
+
 import numpy as np
 from read_mnist import *
+import matplotlib.pyplot as plt
+
+class LossType(enum.Enum):
+    NLL = "NLL"
+    MSE = "MSE"
 
 
 class Module:
@@ -41,14 +48,19 @@ class Sigmoid(Module):
         return dLdZ
 
 class NeuralNetwork:
-    def __init__(self, modules, loss):
+    def __init__(self, modules, loss_type: LossType):
         self.modules = modules
-        self.loss = loss
+        self.loss_type = loss_type
+
+    def MSE_loss(self, Ypred, Y):
+        return np.sum((Ypred - Y) ** 2)
 
     def MSE(self, Ypred, Y):
         dLdA = 2 * (Ypred - Y)
-        # print(dLdA.shape)
         return dLdA
+
+    def NLL_loss(self, Ypred, Y):
+        return np.sum(- (Y * np.log(Ypred) + (1 - Y) * np.log(1 - Ypred)))
 
     def NLL(self, Ypred, Y):  # negative log likelihood or cross entropy
         dLdA = (Ypred - Y) / (Ypred - Ypred**2)
@@ -62,24 +74,34 @@ class NeuralNetwork:
         self.Y = Y_shuffle
 
     def train(self, X, Y, nu, mini_batch_size, epochs, X_test, Y_test):  # Train
+        if loss_type == LossType.NLL:
+            loss_calc = self.NLL_loss
+            loss_fn = self.NLL
+        elif loss_type == LossType.MSE:
+            loss_calc = self.MSE_loss
+            loss_fn = self.MSE
+        else:
+            raise ValueError("Loss must be 'MSE' or 'NLL'")
+
         self.X = X
         self.Y = Y
         _, n = self.X.shape
+        loss = []
         for i in range(epochs):
             self._shuffle_dataset()
+            loss_epoch = 0
             for k in range(0, n, mini_batch_size):
                 Ypred = self.feedforward(self.X[:, k:k+mini_batch_size])
-                if self.loss == "MSE":
-                    delta = self.MSE(Ypred, self.Y[:, k:k+mini_batch_size])
-                elif self.loss == "NLL":
-                    delta = self.NLL(Ypred, self.Y[:, k:k+mini_batch_size])
-                else:
-                    raise ValueError("Loss is not MSE or NLL")
+
+                loss_epoch += loss_calc(Ypred, self.Y[:, k:k+mini_batch_size])
+                delta = loss_fn(Ypred, self.Y[:, k:k+mini_batch_size])
                 self.backward(delta)
                 self.sgd_step(nu, mini_batch_size)
+            loss.append(loss_epoch / n)
             if i % 10 == 0:
                 print(f"Epoch: {i}")
                 self.predict(X_test, Y_test)
+        return loss
 
     def feedforward(self, X):
         for m in self.modules: X = m.feedforward(X)
@@ -97,7 +119,7 @@ class NeuralNetwork:
         Ypred = np.argmax(Y_pred, axis=0)
         Ytest = np.argmax(Y_test, axis=0)
         n_test = np.sum(Ypred == Ytest)
-        print(f"Test set accuracy: {n_test} {len(Ytest)}")
+        print(f"Test set accuracy: {n_test}/{len(Ytest)}")
 
 
 train_images, train_labels, test_images, test_labels = get_images()
@@ -114,14 +136,30 @@ Y = train_labels.T
 X_test = test_images.T
 Y_test = test_labels.T
 
-# FF use MSE as lost function
-net = NeuralNetwork([Linear(784, 30), Sigmoid(), Linear(30, 10), Sigmoid()],"MSE")  # first layer is size of X second can be any size and third is size of Y
-net.train(X, Y, nu=2.0, mini_batch_size=5, epochs=101, X_test=X_test, Y_test=Y_test)
+# FF use MSE as loss function
+loss_type = LossType.MSE
+net = NeuralNetwork([Linear(784, 30), Sigmoid(), Linear(30, 10), Sigmoid()], loss_type)
+loss = net.train(X, Y, nu=2.0, mini_batch_size=5, epochs=201, X_test=X_test, Y_test=Y_test)
 
-# FF use NLL as lost function
-net = NeuralNetwork([Linear(784, 30), Sigmoid(), Linear(30, 10), Sigmoid()],"NLL")
-net.train(X, Y, nu=0.1, mini_batch_size=10, epochs=101, X_test=X_test, Y_test=Y_test)
+plt.plot(loss)
+plt.title(f"Loss using {loss_type.value}")
+plt.xlabel("Epoch")
+plt.ylabel("Loss")
+plt.savefig(f"Loss_using_{loss_type.value}.png")
+plt.show()
 
+
+# FF use NLL as loss function
+loss_type = LossType.NLL
+net = NeuralNetwork([Linear(784, 30), Sigmoid(), Linear(30, 10), Sigmoid()],loss_type)
+loss = net.train(X, Y, nu=0.1, mini_batch_size=10, epochs=201, X_test=X_test, Y_test=Y_test)
+
+plt.plot(loss)
+plt.title(f"Loss using {loss_type.value}")
+plt.xlabel("Epoch")
+plt.ylabel("Loss")
+plt.savefig(f"Loss_using_{loss_type.value}.png")
+plt.show()
 
 
 
