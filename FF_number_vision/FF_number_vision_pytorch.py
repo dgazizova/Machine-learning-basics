@@ -92,7 +92,7 @@ learning_rate = 2.0 if loss_type == LossType.MSE else 0.1
 epochs = 201
 loss = train(
     model, loss_type=loss_type, learning_rate=learning_rate, epochs=epochs,
-    train_dataset=train_dataset, test_datset=test_dataset
+    train_dataset=train_dataset, test_dataset=test_dataset
 )
 
 # Plotting loss
@@ -110,7 +110,7 @@ learning_rate = 2.0 if loss_type == LossType.MSE else 0.1
 epochs = 201
 loss = train(
     model, loss_type=loss_type, learning_rate=learning_rate, epochs=epochs,
-    train_dataset=train_dataset, test_datset=test_dataset
+    train_dataset=train_dataset, test_dataset=test_dataset
 )
 
 # Plotting loss
