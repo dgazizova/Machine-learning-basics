@@ -17,7 +17,7 @@ class Encoder(nn.Module):
 
             nn.Flatten()
         )
-        self.mu = nn.Linear(64 * 7 * 7, latent_dim)    # check what size images i am using
+        self.mu = nn.Linear(64 * 7 * 7, latent_dim)
         self.logvar = nn.Linear(64 * 7 * 7, latent_dim)
 
     def forward(self, x):
@@ -34,11 +34,11 @@ class Decoder(nn.Module):
         self.deconv = nn.Sequential(
             nn.Unflatten(1, (64, 7, 7)),
 
-            nn.ConvTranspose2d(64, 32, kernel_size=3, stride=2, padding=1, output_padding=1),  # 7→14
+            nn.ConvTranspose2d(64, 32, kernel_size=3, stride=2, padding=1, output_padding=1),
             nn.BatchNorm2d(32),
             nn.ReLU(),
 
-            nn.ConvTranspose2d(32, 1, kernel_size=3, stride=2, padding=1, output_padding=1),  # 14→28
+            nn.ConvTranspose2d(32, 1, kernel_size=3, stride=2, padding=1, output_padding=1),
             nn.ReLU(),
         )
 
