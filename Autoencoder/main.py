@@ -42,7 +42,6 @@ def evaluate(model, test_dataset):
 
             loss = model.VAE_loss(x, x_hat, mu, logvar)
             total_loss += loss.item()
-    print(len(test_dataset))
     avg_loss = total_loss / len(test_dataset)
     print(f"[Eval] Test Loss: {avg_loss:.2f}")
 
@@ -96,12 +95,14 @@ def main():
 
     model = VAE(latent_dim=20, beta=5.0).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
-    epochs = 20
+    epochs = 40
 
     train(model, optimizer, epochs, train_dataset)
     evaluate(model, test_dataset)
     plot_images(model, test_dataset)
     sample_from_prior(model)
+
+    torch.save(model.state_dict(), f"vae_beta5_epoch{epochs}.pth")
 
 if __name__ == '__main__':
     main()
