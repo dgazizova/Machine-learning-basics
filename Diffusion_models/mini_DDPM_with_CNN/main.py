@@ -50,7 +50,7 @@ def sampling():
 
 def main():
     training()
-    # sampling()
+    sampling()
 
 if __name__ == '__main__':
     main()

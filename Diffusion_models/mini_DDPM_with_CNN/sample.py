@@ -22,14 +22,14 @@ def sample(model, n_samples=5, img_size=28):
         t_batch = torch.full((n_samples,), t, dtype=torch.long)
         epsilon_theta = model(x_t, t_batch)
 
-        x_0_pred = 1 / alpha[t].sqrt() * (x_t - (1 - alpha[t]) / (1 - alpha_bar[t]).sqrt() * epsilon_theta)
+        mu = 1 / alpha[t].sqrt() * (x_t - (1 - alpha[t]) / (1 - alpha_bar[t]).sqrt() * epsilon_theta)
 
         if t > 0:
             noise = torch.randn_like(x_t)
             sigma_t = beta[t].sqrt()
-            x_t = x_0_pred + sigma_t * noise
+            x_t = mu + sigma_t * noise
         else:
-            x_t = x_0_pred
+            x_t = mu
 
     return x_t
 
